@@ -15,6 +15,7 @@ on:
       - master
 
 jobs:
+  runs-on: ubuntu-latest
   test:
     steps:
       - name: Checkout Code
