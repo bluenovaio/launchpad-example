@@ -1,0 +1,31 @@
+###
+# Continuous Integration
+# ------------
+# This workflow will run tests, build an image, and push to the remote Docker Registry.
+#
+# IMPORTANT: Managed by LaunchPad DO NOT EDIT!
+###
+
+name: "CI [Managed by LaunchPad]"
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  test:
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
+      - name: Use Node.js v14
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Install Packages
+        run: yarn install
+      - name: Lint
+        run: yarn lint
+      - name: Test
+        run: yarn test
