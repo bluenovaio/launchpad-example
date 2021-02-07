@@ -15,8 +15,9 @@ on:
       - master
 
 jobs:
-  runs-on: ubuntu-latest
   test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
