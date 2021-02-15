@@ -15,7 +15,7 @@ on:
       - master
 
 jobs:
-  test:
+  lintAndTest:
     name: Lint & Test
     runs-on: ubuntu-latest
     steps:
