@@ -78,6 +78,8 @@ jobs:
     name: Deploy Preview
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
+    needs:
+      - buildAndPush
     steps:
       - name: Parse the "launchpad.yaml" Config
         id: parseConfig
