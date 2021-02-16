@@ -49,7 +49,6 @@ jobs:
   buildAndPush:
     name: Build & Push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     needs:
       - lintAndTest
     steps:
@@ -69,3 +68,52 @@ jobs:
         with:
           push: true
           tags: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
+
+  ##
+  # Deploy Preview
+  # -----
+  # Deploy a preview version of the application.
+  ##
+  deployPreview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
+    steps:
+      - name: Deploy Preview Service
+        id: deploy
+        uses: bluenovaio/deploy-cloudrun@main
+        with:
+          action: deploy
+          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
+          service: ${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}
+          credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
+      - name: Preview Deploy Link
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'You can view the preview here: [steps.deploy.outputs.url](steps.deploy.outputs.url)'
+            });
+
+  ##
+  # Clean-up Preview
+  # -----
+  # Cleanup the preview version of the application on Merge.
+  ##
+  cleanUpPreview:
+    name: Cleanup Preview Service
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Delete Preview Service
+        id: delete
+        uses: bluenovaio/deploy-cloudrun@main
+        with:
+          action: delete
+          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
+          service: ${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}
+          credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
