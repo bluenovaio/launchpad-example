@@ -5,5 +5,5 @@ COPY . ./
 RUN yarn
 RUN yarn build
 
-EXPOSE 3000
+EXPOSE 8080
 CMD [ "node", "dist/bin/www.js" ]
