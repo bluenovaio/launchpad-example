@@ -81,6 +81,8 @@ jobs:
     needs:
       - buildAndPush
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
       - name: Retrieve Pull-Request ID
         id: prNumber
         uses: actions/github-script@v3
