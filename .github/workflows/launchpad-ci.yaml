@@ -79,6 +79,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
     steps:
+      - name: Parse the "launchpad.yaml" Config
+        id: parseConfig
+        uses: bluenovaio/launchpad-parser@v1.0.0
       - name: Deploy Preview Service
         id: deploy
         uses: bluenovaio/deploy-cloudrun@main
