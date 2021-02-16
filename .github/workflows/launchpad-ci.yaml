@@ -13,8 +13,17 @@ on:
     branches:
       - main
       - master
+  push:
+    branches:
+      - main
+      - master
 
 jobs:
+  ##
+  # Lint & Test
+  # -----
+  # Run standard Linting and Testing via package.json script hooks.
+  ##
   lintAndTest:
     name: Lint & Test
     runs-on: ubuntu-latest
@@ -31,3 +40,32 @@ jobs:
         run: yarn lint
       - name: Test
         run: yarn test
+
+  ##
+  # Build & Push
+  # -----
+  # Build & Push to the the registry defined in the LaunchPad.yaml
+  ##
+  buildAndPush:
+    name: Build & Push
+    runs-on: ubuntu-latest
+    needs:
+      - lintAndTest
+    steps:
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_REGISTRY_SA_KEY }}
+          export_default_credentials: true
+      - name: Configure Docker
+        run: gcloud auth configure-docker --quiet
+      - name: Parse the "launchpad.yaml" Config
+        id: parseConfig
+        uses: bluenovaio/launchpad-parser@v1.0.0
+      - name: Build & Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          push: false
+          tags:
+           - ${{ fromJSON(steps.parseConfig.outputs.contents).name }}:latest
