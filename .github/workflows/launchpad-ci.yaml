@@ -97,7 +97,7 @@ jobs:
               return pullRequestId;
             }
 
-            return parsePullRequestId(process.env.GITHUB_REF);
+            return parsePullRequestId(process.env.GITHUB_REF).toString();
       - name: Parse the "launchpad.yaml" Config
         id: parseConfig
         uses: bluenovaio/launchpad-parser@v1.0.0
