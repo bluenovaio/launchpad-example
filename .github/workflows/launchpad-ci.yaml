@@ -114,12 +114,26 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            github.issues.createComment({
+            const comments = await github.issues.listComments({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: ':rocket: **LaunchPad**: You can view the preview here: [steps.deploy.outputs.url](steps.deploy.outputs.url)'
+            }) || [];
+
+            let found = false;
+
+            comments.forEach((comment) => {
+              found = comment.body.includes(':rocket: **LaunchPad**:');
             });
+
+            if (!found) {
+              github.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: ':rocket: **LaunchPad**: You can view the preview here: [${{ steps.deploy.outputs.url }}](${{ steps.deploy.outputs.url }})'
+              });
+            }
 
   ##
   # Clean-up Preview
