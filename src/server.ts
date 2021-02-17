@@ -8,7 +8,7 @@ export default function () {
   });
 
   app.get('/', (request, reply) => {
-    app.log.info('FOOO');
+    app.log.info('Hello request');
     reply.send({
       hello: hello.world()
     });

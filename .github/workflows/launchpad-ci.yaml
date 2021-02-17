@@ -13,8 +13,17 @@ on:
     branches:
       - main
       - master
+  push:
+    branches:
+      - main
+      - master
 
 jobs:
+  ##
+  # Lint & Test
+  # -----
+  # Run standard Linting and Testing via package.json script hooks.
+  ##
   lintAndTest:
     name: Lint & Test
     runs-on: ubuntu-latest
@@ -31,3 +40,115 @@ jobs:
         run: yarn lint
       - name: Test
         run: yarn test
+
+  ##
+  # Build & Push
+  # -----
+  # Build & Push to the the registry defined in the LaunchPad.yaml
+  ##
+  buildAndPush:
+    name: Build & Push
+    runs-on: ubuntu-latest
+    needs:
+      - lintAndTest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
+      - name: Login to GCR
+        uses: docker/login-action@v1
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCP_OPS_PROJECT_SA_KEY }}
+      - name: Parse the "launchpad.yaml" Config
+        id: parseConfig
+        uses: bluenovaio/launchpad-parser@v1.0.0
+      - name: Build & Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
+
+  ##
+  # Deploy Preview
+  # -----
+  # Deploy a preview version of the application.
+  ##
+  deployPreview:
+    name: Deploy Preview Service
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
+    needs:
+      - buildAndPush
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
+      - name: Retrieve Pull-Request ID
+        id: prNumber
+        uses: actions/github-script@v3
+        with:
+          script: |
+            function parsePullRequestId(githubRef) {
+              const result = /refs\/pull\/(\d+)\/merge/g.exec(githubRef);
+              if (!result) {
+                throw new Error("Reference not found.");
+              }
+              const [, pullRequestId] = result;
+              return pullRequestId;
+            }
+
+            return Number(parsePullRequestId(process.env.GITHUB_REF));
+      - name: Parse the "launchpad.yaml" Config
+        id: parseConfig
+        uses: bluenovaio/launchpad-parser@v1.0.0
+      - name: Deploy Preview Service
+        id: deploy
+        uses: bluenovaio/deploy-cloudrun@main
+        with:
+          action: deploy
+          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
+          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ steps.prNumber.outputs.result }}"
+          credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
+      - name: Post Preview Deploy URL
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const response = await github.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            }) || [];
+
+            let found = false;
+
+            response.data.forEach((comment) => {
+              found = comment.body.includes(':rocket: **LaunchPad**:');
+            });
+
+            if (!found) {
+              github.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: ':rocket: **LaunchPad**: You can view the preview here: [${{ steps.deploy.outputs.url }}](${{ steps.deploy.outputs.url }})'
+              });
+            }
+
+  ##
+  # Clean-up Preview
+  # -----
+  # Cleanup the preview version of the application on Merge.
+  ##
+  cleanUpPreview:
+    name: Cleanup Preview Service
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - name: Delete Preview Service
+        id: delete
+        uses: bluenovaio/deploy-cloudrun@main
+        with:
+          action: delete
+          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ steps.prNumber.outputs.result }}"
+          credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
