@@ -145,6 +145,23 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
+      - name: Retrieve Pull-Request ID
+        id: prNumber
+        uses: actions/github-script@v3
+        with:
+          script: |
+            function parsePullRequestId(githubRef) {
+              const result = /refs\/pull\/(\d+)\/merge/g.exec(githubRef);
+              if (!result) {
+                throw new Error("Reference not found.");
+              }
+              const [, pullRequestId] = result;
+              return pullRequestId;
+            }
+
+            return Number(parsePullRequestId(process.env.GITHUB_REF));
       - name: Delete Preview Service
         id: delete
         uses: bluenovaio/deploy-cloudrun@main
