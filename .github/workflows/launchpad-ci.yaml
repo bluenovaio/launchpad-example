@@ -136,6 +136,5 @@ jobs:
         uses: bluenovaio/deploy-cloudrun@main
         with:
           action: delete
-          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
           service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ steps.prNumber.outputs.result }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}

@@ -2,7 +2,7 @@ import server from '../server';
 
 const app = server();
 
-app.listen(8080, (err, address) => {
+app.listen(process.env.PORT as string, '0.0.0.0', (err, address) => {
   if (err) {
     app.log.error(err as any);
     process.exit(1);
