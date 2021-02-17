@@ -120,6 +120,8 @@ jobs:
               repo: context.repo.repo,
             }) || [];
 
+            console.log(comments);
+
             let found = false;
 
             comments.forEach((comment) => {
