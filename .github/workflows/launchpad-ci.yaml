@@ -114,17 +114,15 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const comments = await github.issues.listComments({
+            const response = await github.issues.listComments({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
             }) || [];
 
-            console.log(comments);
-
             let found = false;
 
-            comments.forEach((comment) => {
+            response.data.forEach((comment) => {
               found = comment.body.includes(':rocket: **LaunchPad**:');
             });
 
