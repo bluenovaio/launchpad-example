@@ -88,6 +88,8 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
+            const fs = require('fs');
+
             function parsePullRequestId(githubRef) {
               const result = /refs\/pull\/(\d+)\/merge/g.exec(githubRef);
               if (!result) {
@@ -97,7 +99,16 @@ jobs:
               return pullRequestId;
             }
 
-            return Number(parsePullRequestId(process.env.GITHUB_REF));
+            const data = { prNumber: `${Number(parsePullRequestId(process.env.GITHUB_REF))}` }
+
+            fs.writeFileSync('pr_number.json', JSON.stringify(data));
+
+            return data.prNumber;
+      - name: Upload PR Number Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: pr_number
+          path: pr_number.json
       - name: Parse the "launchpad.yaml" Config
         id: parseConfig
         uses: bluenovaio/launchpad-parser@v1.0.0
