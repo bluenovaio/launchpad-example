@@ -83,21 +83,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
-      - name: Retrieve Pull-Request ID
-        id: prNumber
-        uses: actions/github-script@v3
-        with:
-          script: |
-            function parsePullRequestId(githubRef) {
-              const result = /refs\/pull\/(\d+)\/merge/g.exec(githubRef);
-              if (!result) {
-                throw new Error("Reference not found.");
-              }
-              const [, pullRequestId] = result;
-              return pullRequestId;
-            }
-
-            return Number(parsePullRequestId(process.env.GITHUB_REF));
       - name: Parse the "launchpad.yaml" Config
         id: parseConfig
         uses: bluenovaio/launchpad-parser@v1.0.0
@@ -107,7 +92,7 @@ jobs:
         with:
           action: deploy
           image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
-          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ steps.prNumber.outputs.result }}"
+          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
       - name: Post Preview Deploy URL
         uses: actions/github-script@v3
@@ -135,6 +120,7 @@ jobs:
               });
             }
 
+
   ##
   # Clean-up Preview
   # -----
@@ -147,25 +133,10 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
-      - name: Retrieve Pull-Request ID
-        id: prNumber
-        uses: actions/github-script@v3
-        with:
-          script: |
-            function parsePullRequestId(githubRef) {
-              const result = /refs\/pull\/(\d+)\/merge/g.exec(githubRef);
-              if (!result) {
-                throw new Error("Reference not found.");
-              }
-              const [, pullRequestId] = result;
-              return pullRequestId;
-            }
-
-            return Number(parsePullRequestId(process.env.GITHUB_REF));
       - name: Delete Preview Service
         id: delete
         uses: bluenovaio/deploy-cloudrun@main
         with:
           action: delete
-          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ steps.prNumber.outputs.result }}"
+          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
