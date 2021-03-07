@@ -133,6 +133,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
+      - name: Parse the "launchpad.yaml" Config
+        id: parseConfig
+        uses: bluenovaio/launchpad-parser@v1.0.0
       - name: Delete Preview Service
         id: delete
         uses: bluenovaio/deploy-cloudrun@main
