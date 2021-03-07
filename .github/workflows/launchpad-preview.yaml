@@ -25,7 +25,7 @@ jobs:
   deployPreview:
     name: Deploy Preview Service
     runs-on: ubuntu-latest
-    if: github.event.type !== 'closed'
+    if: github.event.type != 'closed'
     needs:
       - buildAndPush
     steps:
@@ -76,7 +76,7 @@ jobs:
   cleanUpPreview:
     name: Cleanup Preview Service
     runs-on: ubuntu-latest
-    if: github.event.type === 'closed' && (github.event.payload.base_ref)
+    if: github.event.type == 'closed' && (github.event.payload.base_ref == 'foo')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
