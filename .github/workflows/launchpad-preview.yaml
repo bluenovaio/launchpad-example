@@ -6,7 +6,7 @@
 # IMPORTANT: Managed by LaunchPad DO NOT EDIT!
 ###
 
-name: "Preview [Managed by LaunchPad]"
+name: "Preview [LaunchPad]"
 
 on:
   pull_request:
@@ -76,7 +76,7 @@ jobs:
   cleanUpPreview:
     name: Cleanup Preview Service
     runs-on: ubuntu-latest
-    if: github.event.type === 'closed'
+    if: github.event.type === 'closed' && (github.event.payload.base_ref)
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1

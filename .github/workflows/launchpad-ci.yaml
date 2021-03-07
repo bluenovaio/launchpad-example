@@ -6,7 +6,7 @@
 # IMPORTANT: Managed by LaunchPad DO NOT EDIT!
 ###
 
-name: "CI [Managed by LaunchPad]"
+name: "CI [LaunchPad]"
 
 on:
   pull_request:
@@ -68,79 +68,3 @@ jobs:
         with:
           push: true
           tags: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
-
-  ##
-  # Deploy Preview
-  # -----
-  # Deploy a preview version of the application.
-  ##
-  deployPreview:
-    name: Deploy Preview Service
-    runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
-    needs:
-      - buildAndPush
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v1
-      - name: Parse the "launchpad.yaml" Config
-        id: parseConfig
-        uses: bluenovaio/launchpad-parser@v1.0.0
-      - name: Deploy Preview Service
-        id: deploy
-        uses: bluenovaio/deploy-cloudrun@main
-        with:
-          action: deploy
-          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
-          service: "preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}"
-          credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
-      - name: Post Preview Deploy URL
-        uses: actions/github-script@v3
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const response = await github.issues.listComments({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            }) || [];
-
-            let found = false;
-
-            response.data.forEach((comment) => {
-              found = comment.body.includes(':rocket: **LaunchPad**:');
-            });
-
-            if (!found) {
-              github.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: ':rocket: **LaunchPad**: You can view the preview here: [${{ steps.deploy.outputs.url }}](${{ steps.deploy.outputs.url }})'
-              });
-            }
-
-
-
-  ##
-  # Clean-up Preview
-  # -----
-  # Cleanup the preview version of the application on Merge.
-  ##
-  cleanUpPreview:
-    name: Cleanup Preview Service
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v1
-      - name: Parse the "launchpad.yaml" Config
-        id: parseConfig
-        uses: bluenovaio/launchpad-parser@v1.0.0
-      - name: Delete Preview Service
-        id: delete
-        uses: bluenovaio/deploy-cloudrun@main
-        with:
-          action: delete
-          service: "preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}"
-          credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
