@@ -21,9 +21,8 @@ on:
 #    branches:
 #      - main
 #      - master
-#    types:
-#      - completed
-#      - requested
+    types:
+      - completed
 
 jobs:
 
