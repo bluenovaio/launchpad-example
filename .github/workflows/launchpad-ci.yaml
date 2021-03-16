@@ -6,7 +6,7 @@
 # IMPORTANT: Managed by LaunchPad DO NOT EDIT!
 ###
 
-name: "test"
+name: "ci"
 
 on:
   pull_request:
