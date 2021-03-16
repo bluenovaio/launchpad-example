@@ -17,12 +17,12 @@ on:
       - master
   workflow_run:
     workflows: ["CI [LaunchPad]"]
-    branches:
-      - main
-      - master
+#    branches:
+#      - main
+#      - master
     types:
       - completed
-      - requested
+#      - requested
 
 jobs:
 
