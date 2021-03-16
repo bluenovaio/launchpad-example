@@ -15,14 +15,14 @@ on:
     branches:
       - main
       - master
-  workflow_run:
-    workflows: [ "ci" ]
-    branches:
-      - main
-      - master
-    types:
-      - completed
-      - requested
+#  workflow_run:
+#    workflows: [ "ci" ]
+#    branches:
+#      - main
+#      - master
+#    types:
+#      - completed
+#      - requested
 
 jobs:
 
