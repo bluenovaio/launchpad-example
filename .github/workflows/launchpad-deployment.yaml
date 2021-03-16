@@ -6,7 +6,7 @@
 # IMPORTANT: Managed by LaunchPad DO NOT EDIT!
 ###
 
-name: "Preview [LaunchPad]"
+name: "Deployment [LaunchPad]"
 
 on:
   pull_request:
