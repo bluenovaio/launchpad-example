@@ -46,28 +46,28 @@ jobs:
   # -----
   # Build & Push to the the registry defined in the LaunchPad.yaml
   ##
-#  buildAndPush:
-#    name: Build & Push
-#    runs-on: ubuntu-latest
-##    needs:
-##      - lintAndTest
-#    steps:
-#      - name: Checkout Code
-#        uses: actions/checkout@v1
-#      - name: Login to GCR
-#        uses: docker/login-action@v1
-#        with:
-#          registry: gcr.io
-#          username: _json_key
-#          password: ${{ secrets.GCP_OPS_PROJECT_SA_KEY }}
-#      - name: Parse the "launchpad.yaml" Config
-#        id: parseConfig
-#        uses: bluenovaio/launchpad-parser@v1.0.0
-#      - name: Build & Push Docker Image
-#        uses: docker/build-push-action@v2
-#        with:
-#          push: true
-#          tags: "gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}"
+  buildAndPush:
+    name: Build & Push
+    runs-on: ubuntu-latest
+#    needs:
+#      - lintAndTest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
+      - name: Login to GCR
+        uses: docker/login-action@v1
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCP_OPS_PROJECT_SA_KEY }}
+      - name: Parse the "launchpad.yaml" Config
+        id: parseConfig
+        uses: bluenovaio/launchpad-parser@v1.0.0
+      - name: Build & Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: "gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}"
 
   ##
   # Deploy Preview
@@ -78,8 +78,8 @@ jobs:
     name: Deploy Preview Service
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/master' && github.ref != 'refs/heads/main'
-#    needs:
-#      - buildAndPush
+    needs:
+      - buildAndPush
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
@@ -91,7 +91,7 @@ jobs:
         uses: bluenovaio/deploy-cloudrun@main
         with:
           action: deploy
-          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:d43c6e50e8c483eb3cfe2c60a2b76e20aaabf253
+          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:caa720ee37e8dce64428cfa302422f286a94de35
           service: "preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
           region: us-central1
