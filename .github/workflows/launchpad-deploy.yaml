@@ -1,0 +1,69 @@
+###
+# Deployment
+# ============
+# This workflow to deploy staging & production environments.
+#
+# IMPORTANT: Managed by LaunchPad DO NOT EDIT!
+###
+
+name: "Deploy [LaunchPad]"
+
+on:
+  release:
+    types:
+      - published
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  ##
+  # Deploy Staging
+  # -----
+  # Deploy to the staging environment.
+  ##
+  deployStaging:
+    name: Deploy Staging Service
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
+      - name: Parse the "launchpad.yaml" Config
+        id: parseConfig
+        uses: bluenovaio/launchpad-parser@v1.0.0
+      - name: Deploy Staging Service
+        id: deploy
+        uses: bluenovaio/deploy-cloudrun@main
+        with:
+          action: deploy
+          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
+          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}"
+          credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
+
+  ##
+  # Deploy Production
+  # -----
+  # Deploy to the production environment.
+  ##
+  deployProduction:
+    name: Deploy Production Service
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/master' || github.ref != 'refs/heads/main'
+    needs:
+      - buildAndPush
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
+      - name: Parse the "launchpad.yaml" Config
+        id: parseConfig
+        uses: bluenovaio/launchpad-parser@v1.0.0
+      - name: Deploy Prodcution Service
+        id: deploy
+        uses: bluenovaio/deploy-cloudrun@main
+        with:
+          action: deploy
+          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
+          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}"
+          credentials: ${{ secrets.GCP_PRD_PROJECT_SA_KEY }}

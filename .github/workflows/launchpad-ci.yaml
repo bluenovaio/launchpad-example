@@ -1,6 +1,6 @@
 ###
 # Continuous Integration
-# ------------
+# ============
 # This workflow will run tests, build an image, and push to the remote Docker Registry.
 #
 # IMPORTANT: Managed by LaunchPad DO NOT EDIT!
@@ -67,7 +67,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
+          tags: "gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}"
 
   ##
   # Deploy Preview
@@ -91,7 +91,7 @@ jobs:
         uses: bluenovaio/deploy-cloudrun@main
         with:
           action: deploy
-          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
+          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
           service: "preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
       - name: Post Preview Deploy URL
