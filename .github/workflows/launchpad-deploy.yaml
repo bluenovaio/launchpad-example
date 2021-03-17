@@ -55,7 +55,7 @@ jobs:
   deployProduction:
     name: Deploy Production Service
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/master' || github.ref != 'refs/heads/main'
+    if: github.ref != 'refs/heads/master' && github.ref != 'refs/heads/main'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
