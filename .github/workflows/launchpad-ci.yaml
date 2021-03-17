@@ -28,8 +28,6 @@ jobs:
     name: Lint & Test
     runs-on: ubuntu-latest
     steps:
-      - name: ECHO
-        run: echo "${{ toJson(github) }}"
       - name: Checkout Code
         uses: actions/checkout@v1
       - name: Use Node.js v14
@@ -149,7 +147,7 @@ jobs:
   cleanUpPreview:
     name: Cleanup Preview Service
     runs-on: ubuntu-latest
-    if: github.event.type == 'closed' || github.event.type == 'synchronize'
+    if: github.event.action == 'closed' || github.event.action == 'synchronize'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
