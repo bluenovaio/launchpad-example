@@ -92,7 +92,7 @@ jobs:
         with:
           action: deploy
           image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:caa720ee37e8dce64428cfa302422f286a94de35
-          service: "preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}"
+          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
           region: us-central1
       - uses: actions/upload-artifact@v2
