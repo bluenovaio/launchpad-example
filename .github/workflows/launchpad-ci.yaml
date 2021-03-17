@@ -91,7 +91,7 @@ jobs:
         uses: bluenovaio/deploy-cloudrun@main
         with:
           action: deploy
-          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
+          image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:d43c6e50e8c483eb3cfe2c60a2b76e20aaabf253
           service: "preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
           region: us-central1
