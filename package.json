@@ -9,6 +9,7 @@
     "build": "tsc",
     "test": "jest",
     "lint": "eslint . --ext .ts,.tsx",
+    "format": "echo \\\"Warning: no format specified\\\"",
     "e2e": "echo \\\"Warning: no e2e specified\\\""
   },
   "jest": {
