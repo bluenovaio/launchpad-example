@@ -95,6 +95,16 @@ jobs:
           service: "preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
           region: us-central1
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: logs
+          path: ./error-logs.json
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: logs
+          path: ./request-logs.json
       - name: Post Preview Deploy URL
         uses: actions/github-script@v3
         with:
