@@ -147,7 +147,7 @@ jobs:
   cleanUpPreview:
     name: Cleanup Preview Service
     runs-on: ubuntu-latest
-    if: github.event.type == 'closed' || github.event.type == 'synchronize'
+    if: github.event.action == 'closed' || github.event.action == 'synchronize'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
@@ -155,6 +155,11 @@ jobs:
         id: parseConfig
         uses: bluenovaio/launchpad-parser@v1.0.0
       - name: Set Outputs
+        if: github.event.action == 'synchronize'
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD@{1})"
+      - name: Set Outputs
+        if: github.event.action == 'closed'
         id: vars
         run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       - name: Delete Preview Service
