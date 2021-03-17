@@ -88,7 +88,7 @@ jobs:
         uses: bluenovaio/launchpad-parser@v1.0.0
       - name: Deploy Preview Service
         id: deploy
-        uses: bluenovaio/deploy-cloudrun@main
+        uses: bluenovaio/deploy-cloudrun@debugging
         with:
           action: deploy
           image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:caa720ee37e8dce64428cfa302422f286a94de35
