@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ECHO
-        run: echo "${{ github.event.type }}"
+        run: echo "${{ github.event_name }}" && echo "${{ github.event }}"
       - name: Checkout Code
         uses: actions/checkout@v1
       - name: Use Node.js v14
