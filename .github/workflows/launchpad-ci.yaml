@@ -94,6 +94,7 @@ jobs:
           image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
           service: "preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
+          region: us-central1
       - name: Post Preview Deploy URL
         uses: actions/github-script@v3
         with:
