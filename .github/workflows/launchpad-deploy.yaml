@@ -41,6 +41,11 @@ jobs:
           image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
           service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
+      - uses: bluenovaio/action-slack@main
+        if: failure()
+        with:
+          text: "LaunchPad Staging Deployment Failed: https://github.com/${{ github.repository }}"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL_OPS }}
 
   ##
   # Deploy Production
@@ -67,3 +72,8 @@ jobs:
           image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
           service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}"
           credentials: ${{ secrets.GCP_PRD_PROJECT_SA_KEY }}
+      - uses: bluenovaio/action-slack@main
+        if: failure()
+        with:
+          text: "LaunchPad Production Deployment Failed: https://github.com/${{ github.repository }}"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL_OPS }}

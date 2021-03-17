@@ -120,6 +120,12 @@ jobs:
               });
             }
 
+
+      - uses: bluenovaio/action-slack@main
+        if: failure()
+        with:
+          text: "LaunchPad Preview Deployment Failed: https://github.com/${{ github.repository }}"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL_OPS }}
   ##
   # Clean-up Preview
   # -----
@@ -142,3 +148,8 @@ jobs:
           action: delete
           service: "preview-${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ github.sha }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
+      - uses: bluenovaio/action-slack@main
+        if: failure()
+        with:
+          text: "LaunchPad Preview Cleanup Failed: https://github.com/${{ github.repository }}"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL_OPS }}
