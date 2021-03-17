@@ -86,13 +86,16 @@ jobs:
       - name: Parse the "launchpad.yaml" Config
         id: parseConfig
         uses: bluenovaio/launchpad-parser@v1.0.0
+      - name: Set Outputs
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       - name: Deploy Preview Service
         id: deploy
         uses: bluenovaio/deploy-cloudrun@main
         with:
           action: deploy
           image: gcr.io/${{ secrets.GCP_OPS_PROJECT_ID }}/${{ fromJSON(steps.parseConfig.outputs.contents).name }}:${{ github.sha }}
-          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}-$(echo ${GITHUB_SHA} | cut -c1-8)"
+          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ steps.vars.outputs.sha_short }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
           region: us-central1
       - name: Post Preview Deploy URL
@@ -150,12 +153,15 @@ jobs:
       - name: Parse the "launchpad.yaml" Config
         id: parseConfig
         uses: bluenovaio/launchpad-parser@v1.0.0
+      - name: Set Outputs
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       - name: Delete Preview Service
         id: delete
         uses: bluenovaio/deploy-cloudrun@main
         with:
           action: delete
-          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}-$(echo ${GITHUB_SHA} | cut -c1-8)"
+          service: "${{ fromJSON(steps.parseConfig.outputs.contents).name }}-${{ steps.vars.outputs.sha_short }}"
           credentials: ${{ secrets.GCP_PREPRD_PROJECT_SA_KEY }}
       - uses: bluenovaio/action-slack@main
         if: failure()
