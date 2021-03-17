@@ -109,7 +109,9 @@ jobs:
             let found = false;
 
             response.data.forEach((comment) => {
-              found = comment.body.includes(':rocket: **LaunchPad**:');
+              if (comment.body.includes(':rocket: **LaunchPad**:')) {
+                found = comment;
+              }
             });
 
             if (!found) {
@@ -117,6 +119,13 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
+                body: ':rocket: **LaunchPad**: You can view the preview here: [${{ steps.deploy.outputs.url }}](${{ steps.deploy.outputs.url }})'
+              });
+            } else {
+              github.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: found.id,
                 body: ':rocket: **LaunchPad**: You can view the preview here: [${{ steps.deploy.outputs.url }}](${{ steps.deploy.outputs.url }})'
               });
             }
