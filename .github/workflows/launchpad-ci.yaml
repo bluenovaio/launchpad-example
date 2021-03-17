@@ -124,7 +124,7 @@ jobs:
       - uses: bluenovaio/action-slack@main
         if: failure()
         with:
-          text: "LaunchPad Preview Deployment Failed: https://github.com/${{ github.repository }}"
+          text: "LaunchPad Preview Deployment Failed: https://github.com/${{ github.repository }}/pull/${{github.event.number}}"
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL_OPS }}
   ##
   # Clean-up Preview
@@ -151,5 +151,5 @@ jobs:
       - uses: bluenovaio/action-slack@main
         if: failure()
         with:
-          text: "LaunchPad Preview Cleanup Failed: https://github.com/${{ github.repository }}"
+          text: "LaunchPad Preview Cleanup Failed: https://github.com/${{ github.repository }}/pull/${{github.event.number}}"
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL_OPS }}
